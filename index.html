@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skill DNA — Proof, Not Claims. GitHub Skill Analyzer for Recruiters</title>
+<meta name="description" content="Skill DNA reads a developer's public GitHub work and turns it into verifiable skill evidence: languages, originality, documentation, activity and a recruiter-ready summary. No login required.">
+<style>:root{--bg:#0b1020;--card:#121a33;--card2:#0f1730;--text:#eef2ff;--muted:#aab4d6;--line:#26335f;--accent:#7c5cff;--accent2:#22d3a5;--warn:#fbbf24;--danger:#f87171}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
+a{color:#a5b4fc}.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.top{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);z-index:10}
+.top-in{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
+.logo{font-weight:800;font-size:20px;text-decoration:none;color:var(--text)}.logo span{color:var(--accent2)}
+nav a{margin-left:16px;text-decoration:none;color:var(--muted)}nav a:hover{color:var(--text)}
+.hero{padding:38px 0 20px}.eyebrow{letter-spacing:.12em;font-size:12px;color:var(--accent2);font-weight:700}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:10px 0}h2{margin-top:0}h3{margin-top:0}
+.lead{font-size:18px;color:#dbe2ff;max-width:760px}.hero-points{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0}
+.muted{color:var(--muted)}.small{font-size:13px}
+.form label{display:block;font-weight:600;margin:12px 0 6px}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1230;color:var(--text);font-size:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row input{flex:1;min-width:240px}.row button{flex-shrink:0}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
+.btn:hover{filter:brightness(1.1)}.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-small{padding:8px 12px;font-size:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}nav a{display:none}nav a:last-child{display:inline}}
+.status{margin-top:14px;color:var(--accent2);font-weight:600}.error{background:#3a1218;border:1px solid var(--danger);padding:12px;border-radius:10px;margin-top:14px}
+.results{margin-top:10px}.profile-head{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.profile-head img{border-radius:50%;border:3px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat b{font-size:24px;display:block}.stat span{color:var(--muted);font-size:13px}
+.score-row{margin:12px 0}.score-row .bar{height:12px;background:#1e2a52;border-radius:20px;overflow:hidden}
+.score-row .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.lang-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #1e2a52}
+.dna-code{margin-top:14px;background:#0b1230;padding:10px;border-radius:8px;word-break:break-all}
+.ai-review{background:#0b1230;border-left:4px solid var(--accent2);padding:14px;border-radius:8px;margin:14px 0}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.version{background:#1e2a52;border:1px solid var(--line);padding:2px 10px;border-radius:20px;font-size:12px;color:var(--accent2)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;overflow:auto;padding:20px}
+.modal-card{max-width:760px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.provider-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.provider-card .badge{float:right;background:#12351f;color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:12px}
+.provider-card .badge.off{background:#2a1a1a;color:var(--muted)}
+.foot{padding:24px 18px 40px;color:var(--muted);font-size:13px}
+@media print{body{background:#fff;color:#000}.top,.hero,.form,#demo,#how,.foot{display:none}.card{border:1px solid #ccc;background:#fff}a{color:#000}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href=".">🧬 Skill <span>DNA</span></a>
+    <nav>
+      <a href="#analyzer">Analyzer</a>
+      <a href="#how">How it works</a>
+      <a href="#demo">Demo</a>
+      <button class="btn btn-small" id="openKeysBtn" type="button">⚙️ API Keys (BYOK)</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">FOR DEVELOPERS • FOR RECRUITERS • FOR THE WORLD</p>
+    <h1>Your CV says “expert”.<br>Your code proves it — or it doesn’t.</h1>
+    <p class="lead">Skill DNA analyzes <strong>public GitHub work only</strong> and produces skill evidence, not self-claims: which languages you actually use, how original your work is, how well you document it, and what you should build next.</p>
+    <div class="hero-points">
+      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span class="version">v1.1.0</span>
+    </div>
+  </section>
+
+  <section id="analyzer" class="card">
+    <h2>Analyze a GitHub profile</h2>
+    <p class="muted">Enter a GitHub username, or paste a profile / repository URL. We fetch only public data through the GitHub REST API, in your browser.</p>
+    <form id="analyzeForm" class="form">
+      <label for="username">GitHub username or URL</label>
+      <div class="row">
+        <input id="username" type="text" placeholder="e.g. torvalds  or  https://github.com/torvalds" autocomplete="off" required>
+        <button class="btn" type="submit">Analyze →</button>
+        <button class="btn btn-ghost" type="button" id="demoBtn">Try demo data</button>
+      </div>
+      <p id="keyStatus" class="muted small">API keys: <span id="keyStatusText">none configured — the analyzer still works, with GitHub’s 60/hour unauthenticated limit. Open ⚙️ API Keys to add your own official keys.</span></p>
+      <details>
+        <summary>Advanced — quick one-off key (or use ⚙️ API Keys to save them properly)</summary>
+        <p class="muted small">Unauthenticated GitHub API allows 60 requests/hour per IP. A one-off key here is used only for this analysis and is not saved. For a proper, reusable setup, use the API Keys panel — that is the official BYOK flow.</p>
+        <div class="grid2">
+          <div>
+            <label for="token">GitHub token (optional, one-off)</label>
+            <input id="token" type="password" placeholder="ghp_… (optional)">
+          </div>
+          <div>
+            <label for="aiKey">AI key (optional, one-off)</label>
+            <input id="aiKey" type="password" placeholder="AI key for recruiter review (optional)">
+          </div>
+        </div>
+        <label for="aiProvider">AI provider</label>
+        <select id="aiProvider">
+          <option value="none">Rule-based review only (no AI key needed)</option>
+          <option value="gemini">Google Gemini (free tier)</option>
+          <option value="groq">Groq (free tier)</option>
+          <option value="openai">OpenAI (paid credit, optional)</option>
+        </select>
+      </details>
+    </form>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div id="error" class="error" hidden></div>
+  </section>
+
+  <section id="results" class="results" hidden>
+    <div class="profile-head">
+      <img id="avatar" alt="GitHub avatar" width="88" height="88">
+      <div>
+        <h2 id="profileName">—</h2>
+        <p class="muted" id="profileMeta">—</p>
+        <p id="profileBio">—</p>
+        <p><a id="profileLink" target="_blank" rel="noopener">View on GitHub →</a> <button class="btn btn-small" id="shareBtn" type="button">Copy share link</button> <button class="btn btn-small btn-ghost" id="printBtn" type="button">Print / Save PDF</button></p>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Skill DNA scores</h3>
+        <p class="muted small">Scores are computed from public evidence, not from a CV. See “How scores work” below for the exact formula.</p>
+        <div id="scores"></div>
+        <p class="dna-code">DNA CODE: <code id="dnaCode">—</code></p>
+      </div>
+      <div class="card">
+        <h3>Languages — by actual code, not by claim</h3>
+        <div id="languages"></div>
+        <canvas id="langChart" width="520" height="220" aria-label="Language distribution chart"></canvas>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>✓ Proven strengths <span class="muted small">(with evidence)</span></h3>
+        <ul id="strengths"></ul>
+      </div>
+      <div class="card">
+        <h3>⚠ Gaps &amp; risks</h3>
+        <ul id="gaps"></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 What to build next</h3>
+      <ol id="nextProjects"></ol>
+      <div id="aiReview" class="ai-review" hidden>
+        <h4>AI recruiter review</h4>
+        <p id="aiReviewText"></p>
+      </div>
+      <button class="btn" id="aiBtn" type="button">Generate AI recruiter review</button>
+      <p class="muted small">AI review uses only the aggregated public stats above. It never sees private repos, emails or tokens.</p>
+    </div>
+
+    <div class="card">
+      <h3>📁 Top repositories — the evidence</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Repository</th><th>Language</th><th>★ Stars</th><th>Forks</th><th>Updated</th><th>Type</th></tr></thead>
+        <tbody id="repoTable"></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="recruiterCard">
+      <h3>Recruiter summary — copy &amp; paste</h3>
+      <p id="recruiterSummary"></p>
+      <button class="btn btn-small" id="copySummaryBtn" type="button">Copy summary</button>
+    </div>
+  </section>
+
+  <section id="how" class="card">
+    <h2>How scores work — fully transparent</h2>
+    <ul class="formula">
+      <li><strong>Activity (25%):</strong> share of repos updated in the last 90 days + recency of last push.</li>
+      <li><strong>Originality (25%):</strong> share of non-fork repos. A profile that is 90% forks scores low here — this is the anti-copy signal.</li>
+      <li><strong>Documentation (25%):</strong> share of repos with a description, topics and a homepage/license signal (from public metadata).</li>
+      <li><strong>Popularity (25%):</strong> stars and forks, log-scaled so one viral repo cannot hide an empty profile.</li>
+    </ul>
+    <p class="muted small">Limitations, stated honestly: Skill DNA cannot see private work, code quality inside files, tests, or teamwork. It proves <em>public, verifiable activity</em> — it does not claim to measure talent perfectly. Language bytes come from GitHub’s language endpoint for the top repos.</p>
+  </section>
+
+  <section id="demo" class="card">
+    <h2>Try it in 10 seconds</h2>
+    <p>Click <strong>Try demo data</strong> above. No GitHub account, no API key, no rate-limit risk. Demo data is clearly labelled and uses a fictional developer, so a demo report can never be mistaken for a real person.</p>
+  </section>
+
+  <section class="card">
+    <h2>How BYOK works — in plain words</h2>
+    <p><strong>Step 1:</strong> You create a key on the provider’s own official website (GitHub, Google AI Studio, Groq, OpenAI). <strong>Step 2:</strong> You paste it here. <strong>Step 3:</strong> Your browser calls that provider directly. Skill DNA has no server, so your key never passes through us, is never logged, and is never shared with anyone else. This is exactly how professional tools like ChatGPT’s API playground, Postman and Vercel’s BYOK integrations work — the user brings the key, the tool just uses it.</p>
+    <p class="muted small">Tip for website owners: if you deploy Skill DNA for others, each visitor uses <em>their own</em> key. You do not need to buy or share one master key, and you are not responsible for their usage or billing.</p>
+  </section>
+</main>
+
+<div id="keysModal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2>⚙️ API Keys — Bring Your Own Key</h2>
+      <button class="btn btn-ghost btn-small" id="closeKeysBtn" type="button">✕ Close</button>
+    </div>
+    <p class="muted">Add your own official third-party API keys once, then anyone using this site on this device can run it with their own keys. Keys are masked, testable, and forgettable in one click.</p>
+    <label><input type="checkbox" id="rememberKeys"> Remember keys on this device (otherwise they last only until you close the tab)</label>
+    <div id="providerCards"></div>
+    <div class="row">
+      <button class="btn btn-ghost" id="forgetKeysBtn" type="button">Forget all keys</button>
+      <button class="btn" id="saveKeysBtn" type="button">Save keys</button>
+    </div>
+    <p class="muted small">Security, stated clearly: keys are stored only in this browser (if you ticked Remember), are sent only to the provider you chose, are never included in share links, printouts or recruiter summaries, and are never sent to Skill DNA — there is no Skill DNA server to send them to.</p>
+    <div id="keysStatus" class="status"></div>
+  </div>
+</div>
+
+<footer class="wrap foot">
+  <p>Skill DNA v1.1.0 — BYOK edition. Independent open-source tool, not affiliated with GitHub, Google, Groq or OpenAI. All analysis runs in your browser. · <a href="README.md">README</a> · <a href="docs/BYOK.md">BYOK guide</a> · MIT License</p>
+</footer>
+
+<script>/* Skill DNA — Bring Your Own Key (BYOK) manager.
+   OFFICIAL, THIRD-PARTY API KEYS, THE WAY PROFESSIONAL WEBSITES DO IT:
+   - The user pastes THEIR OWN key, obtained from the provider's official site.
+   - The key is used only in this browser, only to call that provider.
+   - Skill DNA has NO server, so a key can never be sent to Skill DNA.
+   - By default keys live only for this session. If the user ticks
+     "Remember on this device", they are saved in this browser's
+     localStorage (still never sent anywhere except the provider).
+   - Keys are displayed masked (•••• + last 4 chars) and can be
+     forgotten at any time with one button.
+   This file never logs a key, never puts a key in a URL for Gemini/Groq/
+   OpenAI except where that provider's own API requires it (Gemini uses
+   ?key=, as per Google's official docs), and never stores a key in a
+   share link, a printout, or a recruiter summary. */
+(function (global) {
+  const STORAGE_KEY = 'skilldna.keys.v1';
+  const memory = {}; // session-only fallback / storage
+  let remember = false;
+
+  const PROVIDERS = {
+    github: {
+      label: 'GitHub Personal Access Token',
+      purpose: 'Raises the GitHub limit from 60 to 5,000 requests/hour. Public data only — no scopes needed.',
+      getUrl: 'https://github.com/settings/tokens',
+      getLabel: 'Get a free token at github.com/settings/tokens →',
+      placeholder: 'ghp_…',
+      test: async (key) => {
+        const r = await fetch('https://api.github.com/user', { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + key } });
+        if (!r.ok) throw new Error('GitHub rejected the key (HTTP ' + r.status + ').');
+        const u = await r.json();
+        return 'Connected as @' + u.login;
+      }
+    },
+    gemini: {
+      label: 'Google Gemini API Key',
+      purpose: 'Powers the optional AI recruiter review with Gemini (free tier).',
+      getUrl: 'https://aistudio.google.com/apikey',
+      getLabel: 'Get a free key at Google AI Studio →',
+      placeholder: 'AIza…',
+      test: async (key) => {
+        const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key));
+        if (!r.ok) throw new Error('Gemini rejected the key (HTTP ' + r.status + ').');
+        return 'Gemini key is valid.';
+      }
+    },
+    groq: {
+      label: 'Groq API Key',
+      purpose: 'Powers the optional AI recruiter review with Groq (free tier, fast).',
+      getUrl: 'https://console.groq.com/keys',
+      getLabel: 'Get a free key at Groq Console →',
+      placeholder: 'gsk_…',
+      test: async (key) => {
+        const r = await fetch('https://api.groq.com/openai/v1/models', { headers: { Authorization: 'Bearer ' + key } });
+        if (!r.ok) throw new Error('Groq rejected the key (HTTP ' + r.status + ').');
+        return 'Groq key is valid.';
+      }
+    },
+    openai: {
+      label: 'OpenAI API Key',
+      purpose: 'Optional AI recruiter review with OpenAI. Note: OpenAI has no permanent free tier — use only if you already have credit.',
+      getUrl: 'https://platform.openai.com/api-keys',
+      getLabel: 'Get a key at platform.openai.com →',
+      placeholder: 'sk-…',
+      test: async (key) => {
+        const r = await fetch('https://api.openai.com/v1/models', { headers: { Authorization: 'Bearer ' + key } });
+        if (!r.ok) throw new Error('OpenAI rejected the key (HTTP ' + r.status + ').');
+        return 'OpenAI key is valid.';
+      }
+    }
+  };
+
+  function loadStored() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) { remember = true; return JSON.parse(raw); }
+    } catch (e) { /* storage unavailable (private mode, widget) — session only */ }
+    return {};
+  }
+  let stored = loadStored();
+  Object.assign(memory, stored);
+
+  function persist() {
+    try {
+      if (remember) localStorage.setItem(STORAGE_KEY, JSON.stringify(memory));
+      else localStorage.removeItem(STORAGE_KEY);
+    } catch (e) { /* ignore */ }
+  }
+
+  function getKey(p) { return memory[p] || ''; }
+  function hasKey(p) { return !!memory[p]; }
+  function mask(key) { return key ? '••••••••' + key.slice(-4) : 'Not configured'; }
+  function setKey(p, key) {
+    key = (key || '').trim();
+    if (key) memory[p] = key; else delete memory[p];
+    persist();
+  }
+  function setRemember(v) { remember = !!v; persist(); }
+  function isRemembered() { return remember; }
+  function clearAll() {
+    Object.keys(memory).forEach(k => delete memory[k]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    remember = false;
+  }
+  async function testKey(p) {
+    const key = getKey(p);
+    if (!key) throw new Error('No key saved for ' + PROVIDERS[p].label + ' yet.');
+    return PROVIDERS[p].test(key);
+  }
+
+  global.SkillDNA_Keys = { PROVIDERS, getKey, hasKey, mask, setKey, setRemember, isRemembered, clearAll, testKey };
+})(window);
+/* Skill DNA — GitHub API client (public data only, browser-side).
+   No key is stored. A token, if supplied, is sent only as an
+   Authorization header to api.github.com for that session. */
+(function (global) {
+  const API = 'https://api.github.com';
+
+  function parseInput(raw) {
+    let s = (raw || '').trim();
+    s = s.replace(/^https?:\/\/(www\.)?github\.com\//i, '');
+    s = s.replace(/\/$/, '').split('/')[0].split('?')[0];
+    return s;
+  }
+
+  async function request(url, token) {
+    const headers = { 'Accept': 'application/vnd.github+json' };
+    if (token) headers.Authorization = 'Bearer ' + token;
+    const res = await fetch(url, { headers });
+    if (res.status === 404) throw new Error('GitHub user not found. Check the spelling and try again.');
+    if (res.status === 403) {
+      const reset = res.headers.get('x-ratelimit-reset');
+      const when = reset ? new Date(Number(reset) * 1000).toLocaleTimeString() : 'later';
+      throw new Error('GitHub API rate limit reached. Try demo data, wait until ' + when + ', or add a free public-read token.');
+    }
+    if (!res.ok) throw new Error('GitHub request failed (HTTP ' + res.status + '). Please try again.');
+    return res.json();
+  }
+
+  async function fetchProfile(username, token, onProgress) {
+    const user = await request(API + '/users/' + encodeURIComponent(username), token);
+    onProgress && onProgress('Found @' + user.login + ' — loading repositories…');
+    const repos = await request(
+      API + '/users/' + encodeURIComponent(username) + '/repos?per_page=100&sort=updated&type=owner', token);
+    // Language breakdown for the top 12 repos by stars + recency.
+    const top = [...repos].sort((a, b) => (b.stargazers_count - a.stargazers_count)).slice(0, 12);
+    const languages = {};
+    let done = 0;
+    for (const repo of top) {
+      try {
+        const langs = await request(repo.languages_url, token);
+        for (const [lang, bytes] of Object.entries(langs)) languages[lang] = (languages[lang] || 0) + bytes;
+      } catch (e) { /* one repo failing must not kill the whole report */ }
+      done++;
+      onProgress && onProgress('Analyzing languages… ' + done + '/' + top.length + ' repos');
+    }
+    return { user, repos, languages };
+  }
+
+  global.SkillDNA_GitHub = { parseInput, fetchProfile };
+})(window);
+/* Skill DNA — pure analysis. No network, no DOM side-effects.
+   Every score can be unit-tested from (user, repos, languages) alone. */
+(function (global) {
+  function daysAgo(dateStr) {
+    return (Date.now() - new Date(dateStr).getTime()) / 86400000;
+  }
+  function clamp(n) { return Math.max(0, Math.min(100, Math.round(n))); }
+  function pct(part, total) { return total ? Math.round(part / total * 100) : 0; }
+
+  function analyze(user, repos, languages) {
+    const totalRepos = repos.length;
+    const stars = repos.reduce((s, r) => s + (r.stargazers_count || 0), 0);
+    const forks = repos.reduce((s, r) => s + (r.forks_count || 0), 0);
+    const original = repos.filter(r => !r.fork);
+    const recent = repos.filter(r => daysAgo(r.pushed_at || r.updated_at) <= 90);
+    const described = repos.filter(r => r.description);
+    const withTopics = repos.filter(r => (r.topics || []).length > 0);
+
+    const langTotal = Object.values(languages).reduce((s, n) => s + n, 0);
+    const langList = Object.entries(languages)
+      .map(([name, bytes]) => ({ name, bytes, percent: pct(bytes, langTotal) }))
+      .sort((a, b) => b.bytes - a.bytes);
+
+    const topics = {};
+    repos.forEach(r => (r.topics || []).forEach(t => { topics[t] = (topics[t] || 0) + 1; }));
+    const topTopics = Object.entries(topics).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    // --- Scores (formula is documented in index.html / README) ---
+    const activity = clamp((recent.length / Math.max(1, totalRepos)) * 70 + (totalRepos && daysAgo(repos[0].pushed_at || repos[0].updated_at) < 30 ? 30 : 10));
+    const originality = clamp((original.length / Math.max(1, totalRepos)) * 100);
+    const documentation = clamp(((described.length + withTopics.length) / Math.max(1, totalRepos * 2)) * 100);
+    const popularity = clamp(Math.log10(stars + forks + 1) * 33);
+    const overall = clamp(activity * 0.25 + originality * 0.25 + documentation * 0.25 + popularity * 0.25);
+
+    const strengths = [];
+    langList.slice(0, 3).forEach(l => {
+      const evidence = repos.filter(r => r.language === l.name).sort((a, b) => b.stargazers_count - a.stargazers_count)[0];
+      strengths.push(l.name + ' — ' + l.percent + '% of analyzed code' + (evidence ? ' (evidence: ' + evidence.name + ')' : ''));
+    });
+    if (original.length === totalRepos && totalRepos > 0) strengths.push('100% original repositories — no forks counted as own work.');
+    if (stars >= 50) strengths.push(stars + ' total stars — other developers actually use this work.');
+    if (recent.length >= 3) strengths.push('Active recently: ' + recent.length + ' repos updated in the last 90 days.');
+
+    const gaps = [];
+    if (totalRepos === 0) gaps.push('No public repositories found. Skill DNA can only verify public work.');
+    if (langList.length > 0 && langList[0].percent >= 80) gaps.push('Very narrow: ' + langList[0].name + ' is ' + langList[0].percent + '% of code. Add a second stack to be hireable for more roles.');
+    if (originality < 50) gaps.push('High fork ratio (' + (100 - originality) + '% forks). Recruiters discount forked work — build more original projects.');
+    if (documentation < 50) gaps.push('Weak documentation: many repos lack a description or topics. A good README is often the first thing a recruiter reads.');
+    if (recent.length === 0 && totalRepos > 0) gaps.push('No public activity in the last 90 days. Consistency matters more than one old viral repo.');
+    if (stars === 0 && totalRepos > 0) gaps.push('No stars yet. Share projects, write a clear README, and solve a visible problem to earn social proof.');
+
+    const next = [];
+    if (langList.length > 0 && langList[0].percent >= 80) next.push('Full-stack companion project: keep your main language, add a backend API + database + auth in a second language.');
+    if (documentation < 70) next.push('Documentation sprint: rewrite the README of your top 3 repos with problem, demo link, setup steps and screenshots.');
+    if (originality < 70) next.push('One original, problem-solving project from scratch — no tutorial clone, no fork — with a live demo link.');
+    next.push('Testing & CI project: add automated tests and GitHub Actions to one existing repo and document the result.');
+    if (topTopics.length === 0) next.push('Add topics to every repo (e.g. react, api, machine-learning) so both GitHub search and recruiters can find your work.');
+
+    const dnaCode = langList.slice(0, 4).map(l => l.name.toUpperCase().slice(0, 2) + '-' + l.percent).join('|') || 'NO-DATA';
+    const topLang = langList[0] ? langList[0].name : 'no dominant language';
+    const summary = (user.name || user.login) + ' is a developer with ' + totalRepos + ' public repositories and ' + stars + ' total stars. ' +
+      'Verified strengths are concentrated in ' + topLang + ' (Skill DNA overall: ' + overall + '/100; originality ' + originality + '/100, activity ' + activity + '/100). ' +
+      'Evidence: github.com/' + user.login + '. This summary is computed from public GitHub data only.';
+
+    return {
+      totalRepos, stars, forks, followers: user.followers || 0, following: user.following || 0,
+      originalCount: original.length, recentCount: recent.length,
+      langList, topTopics, activity, originality, documentation, popularity, overall,
+      strengths: strengths.length ? strengths : ['Not enough public data to prove a strength yet — start with one original, documented project.'],
+      gaps: gaps.length ? gaps : ['No major gaps detected in public data. Next step: a larger, deployed project with tests.'],
+      next: [...new Set(next)].slice(0, 4), dnaCode, summary
+    };
+  }
+
+  // Fictional demo data — clearly labelled in the UI, never a real person.
+  function demoData() {
+    const user = { login: 'demo-dev', name: 'Demo Developer', avatar_url: 'https://avatars.githubusercontent.com/u/583231?v=4', html_url: 'https://github.com/octocat', bio: 'Demo profile for Skill DNA — fictional data for testing only.', followers: 42, following: 18, created_at: '2021-03-01T00:00:00Z' };
+    const repos = [
+      { name: 'taskflow-app', language: 'JavaScript', stargazers_count: 48, forks_count: 9, fork: false, description: 'A task app with drag-and-drop and offline support.', topics: ['react', 'frontend'], pushed_at: new Date(Date.now() - 5 * 86400000).toISOString(), updated_at: new Date().toISOString(), html_url: 'https://github.com/octocat/Hello-World' },
+      { name: 'shop-api', language: 'Python', stargazers_count: 31, forks_count: 4, fork: false, description: 'REST API for a small shop with auth and tests.', topics: ['api', 'python'], pushed_at: new Date(Date.now() - 20 * 86400000).toISOString(), updated_at: new Date().toISOString(), html_url: 'https://github.com/octocat/Hello-World' },
+      { name: 'portfolio-site', language: 'HTML', stargazers_count: 12, forks_count: 2, fork: false, description: '', topics: [], pushed_at: new Date(Date.now() - 120 * 86400000).toISOString(), updated_at: new Date().toISOString(), html_url: 'https://github.com/octocat/Hello-World' },
+      { name: 'tutorial-clone', language: 'JavaScript', stargazers_count: 2, forks_count: 0, fork: true, description: 'Forked tutorial project.', topics: [], pushed_at: new Date(Date.now() - 200 * 86400000).toISOString(), updated_at: new Date().toISOString(), html_url: 'https://github.com/octocat/Hello-World' }
+    ];
+    const languages = { JavaScript: 62000, Python: 28000, HTML: 10000 };
+    return { user, repos, languages, isDemo: true };
+  }
+
+  global.SkillDNA_Analyzer = { analyze, demoData };
+})(window);
+/* Skill DNA — optional free AI review.
+   Runs only when the user pastes their own key. The key is never stored
+   in localStorage, never sent to Skill DNA (there is no backend), and is
+   sent only to the provider the user selected, with aggregated public stats. */
+(function (global) {
+  async function aiReview(provider, key, report) {
+    const prompt = 'You are a hiring manager. Review this developer from PUBLIC GitHub stats only. ' +
+      'Be specific, fair, and constructive in under 180 words. Do not invent skills or projects. ' +
+      'Stats: ' + JSON.stringify({
+        repos: report.totalRepos, stars: report.stars, overall: report.overall,
+        activity: report.activity, originality: report.originality,
+        documentation: report.documentation, popularity: report.popularity,
+        languages: report.langList.slice(0, 4), strengths: report.strengths, gaps: report.gaps
+      });
+
+    if (provider === 'gemini') {
+      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(key), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      if (!res.ok) throw new Error('Gemini request failed (HTTP ' + res.status + '). Check the key and free-tier quota.');
+      const data = await res.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No AI response returned.';
+    }
+    if (provider === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 500 })
+      });
+      if (!res.ok) throw new Error('OpenAI request failed (HTTP ' + res.status + '). Check the key and credit.');
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || 'No AI response returned.';
+    }
+    if (provider === 'groq') {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 500 })
+      });
+      if (!res.ok) throw new Error('Groq request failed (HTTP ' + res.status + '). Check the key and free-tier quota.');
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || 'No AI response returned.';
+    }
+    throw new Error('Choose an AI provider and paste a free key, or use the rule-based review.');
+  }
+  global.SkillDNA_AI = { aiReview };
+})(window);
+/* Skill DNA — UI orchestration. Keeps rendering separate from analysis. */
+(function () {
+  const $ = id => document.getElementById(id);
+  let current = null; // { user, report, isDemo }
+
+  function setStatus(t) { $('status').textContent = t || ''; }
+  function showError(msg) { const e = $('error'); e.hidden = !msg; e.textContent = msg || ''; }
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  function scoreRow(label, value) {
+    return '<div class="score-row"><div style="display:flex;justify-content:space-between"><span>' + label + '</span><b>' + value + '/100</b></div>' +
+      '<div class="bar"><div class="fill" style="width:' + value + '%"></div></div></div>';
+  }
+
+  function drawChart(langList) {
+    const c = $('langChart'); if (!c) return;
+    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
+    const colors = ['#7c5cff', '#22d3a5', '#fbbf24', '#f87171', '#38bdf8', '#a78bfa'];
+    langList.slice(0, 6).forEach((l, i) => {
+      const y = 12 + i * 34;
+      ctx.fillStyle = '#1e2a52'; ctx.fillRect(10, y, 480, 22);
+      ctx.fillStyle = colors[i % colors.length]; ctx.fillRect(10, y, Math.max(20, l.percent / 100 * 480), 22);
+      ctx.fillStyle = '#fff'; ctx.font = '13px sans-serif';
+      ctx.fillText(l.name + ' — ' + l.percent + '%', 16, y + 15);
+    });
+    if (!langList.length) { ctx.fillStyle = '#aab4d6'; ctx.font = '14px sans-serif'; ctx.fillText('No language data available.', 10, 40); }
+  }
+
+  function render(user, report, isDemo) {
+    current = { user, report, isDemo };
+    $('results').hidden = false;
+    $('avatar').src = user.avatar_url || '';
+    $('profileName').textContent = (user.name || user.login) + (isDemo ? '  •  DEMO DATA' : '');
+    $('profileMeta').textContent = '@' + user.login + '  •  ' + report.followers + ' followers  •  Joined ' + new Date(user.created_at).getFullYear();
+    $('profileBio').textContent = user.bio || 'No bio on GitHub.';
+    $('profileLink').href = user.html_url;
+    $('stats').innerHTML = [
+      ['Repos', report.totalRepos], ['★ Stars', report.stars], ['Forks received', report.forks],
+      ['Original repos', report.originalCount], ['Active (90d)', report.recentCount]
+    ].map(([k, v]) => '<div class="stat"><b>' + v + '</b><span>' + k + '</span></div>').join('');
+    $('scores').innerHTML = scoreRow('Overall Skill DNA', report.overall) + scoreRow('Activity', report.activity) +
+      scoreRow('Originality (anti-copy)', report.originality) + scoreRow('Documentation', report.documentation) + scoreRow('Popularity', report.popularity);
+    $('dnaCode').textContent = report.dnaCode;
+    $('languages').innerHTML = report.langList.length ? report.langList.map(l =>
+      '<div class="lang-row"><span>' + esc(l.name) + '</span><b>' + l.percent + '%</b></div>').join('')
+      : '<p class="muted">No language data found for the top repos.</p>';
+    drawChart(report.langList);
+    $('strengths').innerHTML = report.strengths.map(s => '<li>' + esc(s) + '</li>').join('');
+    $('gaps').innerHTML = report.gaps.map(s => '<li>' + esc(s) + '</li>').join('');
+    $('nextProjects').innerHTML = report.next.map(s => '<li>' + esc(s) + '</li>').join('');
+    $('recruiterSummary').textContent = report.summary;
+    $('results').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function renderRepos(repos) {
+    const top = [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 10);
+    $('repoTable').innerHTML = top.length ? top.map(r =>
+      '<tr><td><a href="' + esc(r.html_url) + '" target="_blank" rel="noopener">' + esc(r.name) + '</a><br><span class="muted small">' + esc(r.description || '') + '</span></td>' +
+      '<td>' + esc(r.language || '—') + '</td><td>' + r.stargazers_count + '</td><td>' + r.forks_count + '</td>' +
+      '<td>' + new Date(r.pushed_at || r.updated_at).toLocaleDateString() + '</td><td>' + (r.fork ? 'Fork' : 'Original') + '</td></tr>').join('')
+      : '<tr><td colspan="6">No public repositories found.</td></tr>';
+  }
+
+  async function analyzeLive(username, token) {
+    showError(''); setStatus('Connecting to GitHub…');
+    const data = await SkillDNA_GitHub.fetchProfile(username, token, setStatus);
+    const report = SkillDNA_Analyzer.analyze(data.user, data.repos, data.languages);
+    render(data.user, report, false); renderRepos(data.repos); setStatus('Analysis complete. Share link: ?user=' + data.user.login);
+    history.replaceState(null, '', '?user=' + encodeURIComponent(data.user.login));
+  }
+
+  function analyzeDemo() {
+    showError(''); setStatus('Loading demo data…');
+    const d = SkillDNA_Analyzer.demoData();
+    const report = SkillDNA_Analyzer.analyze(d.user, d.repos, d.languages);
+    render(d.user, report, true); renderRepos(d.repos); setStatus('Demo report loaded. This is fictional data — try a real username for a real report.');
+  }
+
+  // ----- BYOK: keys panel, status, resolution -----
+  function refreshKeyStatus() {
+    const K = window.SkillDNA_Keys; if (!K) return;
+    const parts = Object.keys(K.PROVIDERS).map(p => p + ': ' + (K.hasKey(p) ? '✓ ' + K.mask(K.getKey(p)) : '—'));
+    const el = $('keyStatusText'); if (el) el.textContent = parts.join('  •  ');
+    const rem = $('rememberKeys'); if (rem) rem.checked = K.isRemembered();
+  }
+  function renderProviderCards() {
+    const K = window.SkillDNA_Keys; if (!K) return;
+    $('providerCards').innerHTML = Object.entries(K.PROVIDERS).map(([id, p]) => `
+      <div class="provider-card">
+        <span class="badge ${K.hasKey(id) ? '' : 'off'}">${K.hasKey(id) ? '✓ Configured' : 'Not configured'}</span>
+        <h3>${p.label}</h3>
+        <p class="muted small">${p.purpose}</p>
+        <p><a href="${p.getUrl}" target="_blank" rel="noopener">${p.getLabel}</a></p>
+        <label>API key (paste your own — never share it publicly)</label>
+        <input type="password" data-key-for="${id}" placeholder="${p.placeholder} — leave blank to keep the saved key (${K.mask(K.getKey(id))})">
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-small btn-ghost" type="button" data-test-for="${id}">Test this key</button>
+          <span class="muted small" data-test-result="${id}"></span>
+        </div>
+      </div>`).join('');
+    document.querySelectorAll('[data-test-for]').forEach(btn => btn.addEventListener('click', async () => {
+      const id = btn.dataset.testFor, out = document.querySelector('[data-test-result="' + id + '"]');
+      out.textContent = 'Testing…';
+      // Save first if the user just typed a new key, so Test checks the new one.
+      const input = document.querySelector('[data-key-for="' + id + '"]');
+      if (input && input.value.trim()) K.setKey(id, input.value.trim());
+      try { out.textContent = '✓ ' + await K.testKey(id); refreshKeyStatus(); renderProviderCards(); }
+      catch (e) { out.textContent = '✗ ' + e.message; }
+    }));
+  }
+  function openKeys() { renderProviderCards(); refreshKeyStatus(); $('keysModal').hidden = false; }
+  function closeKeys() { $('keysModal').hidden = true; refreshKeyStatus(); }
+  $('openKeysBtn').addEventListener('click', openKeys);
+  $('closeKeysBtn').addEventListener('click', closeKeys);
+  $('keysModal').addEventListener('click', e => { if (e.target.id === 'keysModal') closeKeys(); });
+  $('saveKeysBtn').addEventListener('click', () => {
+    const K = window.SkillDNA_Keys;
+    K.setRemember($('rememberKeys').checked);
+    document.querySelectorAll('[data-key-for]').forEach(input => { if (input.value.trim()) K.setKey(input.dataset.keyFor, input.value.trim()); });
+    $('keysStatus').textContent = 'Keys saved. Remember: ' + (K.isRemembered() ? 'on this device' : 'this session only') + '.';
+    refreshKeyStatus(); renderProviderCards();
+  });
+  $('forgetKeysBtn').addEventListener('click', () => {
+    window.SkillDNA_Keys.clearAll();
+    $('keysStatus').textContent = 'All keys forgotten.';
+    refreshKeyStatus(); renderProviderCards();
+  });
+  refreshKeyStatus();
+
+  $('analyzeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const username = SkillDNA_GitHub.parseInput($('username').value);
+    if (!username) { showError('Please enter a GitHub username.'); return; }
+    const token = $('token').value.trim() || (window.SkillDNA_Keys ? window.SkillDNA_Keys.getKey('github') : '') || null;
+    try { await analyzeLive(username, token); }
+    catch (err) { showError(err.message); setStatus(''); }
+  });
+  $('demoBtn').addEventListener('click', analyzeDemo);
+
+  $('shareBtn').addEventListener('click', async () => {
+    if (!current) return;
+    const url = location.origin + location.pathname + '?user=' + encodeURIComponent(current.user.login);
+    try { await navigator.clipboard.writeText(url); setStatus('Share link copied.'); }
+    catch { setStatus(url); }
+  });
+  $('copySummaryBtn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('recruiterSummary').textContent); setStatus('Recruiter summary copied.'); } catch {}
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+
+  $('aiBtn').addEventListener('click', async () => {
+    if (!current) return;
+    let provider = $('aiProvider').value;
+    let key = $('aiKey').value.trim();
+    // Fall back to a saved BYOK key, so the panel is the main flow and
+    // the one-off field is only an override.
+    const K = window.SkillDNA_Keys;
+    if (!key && K) {
+      if (provider !== 'none' && K.getKey(provider)) key = K.getKey(provider);
+      else if (provider === 'none') {
+        for (const p of ['gemini', 'groq', 'openai']) if (K.getKey(p)) { provider = p; key = K.getKey(p); break; }
+      }
+    }
+    if (provider === 'none') {
+      $('aiReview').hidden = false;
+      $('aiReviewText').textContent = 'Rule-based review: ' + current.report.summary + ' Top gap to fix first: ' + current.report.gaps[0];
+      return;
+    }
+    if (!key) { showError('Add an AI key first — open ⚙️ API Keys and paste your own official key, or paste a one-off key above.'); return; }
+    showError(''); setStatus('Generating AI review…');
+    try {
+      const text = await SkillDNA_AI.aiReview(provider, key, current.report);
+      $('aiReview').hidden = false; $('aiReviewText').textContent = text; setStatus('AI review ready.');
+    } catch (err) { showError(err.message); setStatus(''); }
+  });
+
+  // Auto-load from ?user=… (share links)
+  const params = new URLSearchParams(location.search);
+  const shared = params.get('user');
+  if (shared) { $('username').value = shared; analyzeLive(shared, (window.SkillDNA_Keys ? window.SkillDNA_Keys.getKey('github') : '') || null).catch(err => showError(err.message)); }
+})();
+</script>
+</body>
+</html>
