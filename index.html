@@ -35,6 +35,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .top{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:10}
 .top-in{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;gap:12px;flex-wrap:wrap}
 .logo{font-weight:800;font-size:20px;text-decoration:none;color:var(--text)}.logo span{color:var(--accent2)}
+/* v2.2: Settings is bold text, not a button — same row and same height
+   as the logo, flush to the far right. No icon, no button chrome. */
+.settings-text{background:none;border:0;padding:6px 2px;color:var(--text);font-size:17px;font-weight:800;letter-spacing:.01em;cursor:pointer;line-height:1.2}
+.settings-text:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+.settings-text:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}
 nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .theme-group,.view-group{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden}
@@ -99,24 +104,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href=".">🧬 Skill <span>DNA</span></a>
-    <nav>
-      <a href="#analyzer">Analyzer</a>
-      <a href="#how">How it works</a>
-      <a href="#demo">Demo</a>
-      <div class="controls" role="group" aria-label="Theme">
-        <div class="theme-group" id="themeGroup">
-          <button type="button" data-theme-btn="general" class="active">General</button>
-          <button type="button" data-theme-btn="dark">Dark</button>
-          <button type="button" data-theme-btn="cherry">Cherry</button>
-        </div>
-        <div class="view-group" id="viewGroup" role="group" aria-label="Layout">
-          <button type="button" data-view-btn="auto" class="active">Auto</button>
-          <button type="button" data-view-btn="mobile">Mobile</button>
-          <button type="button" data-view-btn="desktop">Desktop</button>
-        </div>
-      </div>
-      <button class="btn btn-small" id="openKeysBtn" type="button">⚙️ API Keys (BYOK)</button>
-    </nav>
+    <button class="settings-text" id="openKeysBtn" type="button" aria-label="Open settings">Settings</button>
   </div>
 </header>
 
@@ -126,7 +114,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     <h1>Your CV says “expert”.<br>Your code proves it — or it doesn’t.</h1>
     <p class="lead">Skill DNA analyzes <strong>public GitHub work only</strong> and produces skill evidence, not self-claims: which languages you actually use, how original your work is, how well you document it, and what you should build next.</p>
     <div class="hero-points">
-      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span>✓ Mobile + Desktop</span><span class="version">v2.0</span>
+      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span>✓ Mobile + Desktop</span><span class="version">v2.2</span>
     </div>
   </section>
 
@@ -140,10 +128,10 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
         <button class="btn" type="submit">Analyze →</button>
         <button class="btn btn-ghost" type="button" id="demoBtn">Try demo data</button>
       </div>
-      <p id="keyStatus" class="muted small">API keys: <span id="keyStatusText">none configured — the analyzer still works, with GitHub’s 60/hour unauthenticated limit. Open ⚙️ API Keys to add your own official keys.</span></p>
+      <p id="keyStatus" class="muted small">API keys: <span id="keyStatusText">none configured — the analyzer still works, with GitHub’s 60/hour unauthenticated limit. Open Settings to add your own official keys.</span></p>
       <details>
-        <summary>Advanced — quick one-off key (or use ⚙️ API Keys to save them properly)</summary>
-        <p class="muted small">Unauthenticated GitHub API allows 60 requests/hour per IP. A one-off key here is used only for this analysis and is not saved. For a proper, reusable setup, use the API Keys panel — that is the official BYOK flow.</p>
+        <summary>Advanced — quick one-off key (or use Settings to save them properly)</summary>
+        <p class="muted small">Unauthenticated GitHub API allows 60 requests/hour per IP. A one-off key here is used only for this analysis and is not saved.</p>
         <div class="grid2">
           <div>
             <label for="token">GitHub token (optional, one-off)</label>
@@ -184,7 +172,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     <div class="grid2">
       <div class="card">
         <h3>Skill DNA scores <span class="grade" id="gradeBadge">—</span></h3>
-        <p class="muted small">Scores are computed from public evidence, not from a CV. See “How scores work” below for the exact formula.</p>
+        <p class="muted small">Scores are computed from public evidence, not from a CV.</p>
         <div id="scores"></div>
         <p class="dna-code">DNA CODE: <code id="dnaCode">—</code></p>
         <h4>Topics</h4>
@@ -239,50 +227,37 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     </div>
   </section>
 
-  <section id="how" class="card">
-    <h2>How scores work — fully transparent</h2>
-    <ul class="formula">
-      <li><strong>Activity (25%):</strong> share of repos updated in the last 90 days + recency of last push.</li>
-      <li><strong>Originality (25%):</strong> share of non-fork repos. A profile that is 90% forks scores low here — this is the anti-copy signal.</li>
-      <li><strong>Documentation (25%):</strong> share of repos with a description, topics and a homepage/license signal (from public metadata).</li>
-      <li><strong>Popularity (25%):</strong> stars and forks, log-scaled so one viral repo cannot hide an empty profile.</li>
-    </ul>
-    <p class="muted small">Limitations, stated honestly: Skill DNA cannot see private work, code quality inside files, tests, or teamwork. It proves <em>public, verifiable activity</em> — it does not claim to measure talent perfectly. Language bytes come from GitHub’s language endpoint for the top repos.</p>
-  </section>
-
-  <section id="demo" class="card">
-    <h2>Try it in 10 seconds</h2>
-    <p>Click <strong>Try demo data</strong> above. No GitHub account, no API key, no rate-limit risk. Demo data is clearly labelled and uses a fictional developer, so a demo report can never be mistaken for a real person.</p>
-  </section>
-
-  <section class="card">
-    <h2>How BYOK works — in plain words</h2>
-    <p><strong>Step 1:</strong> You create a key on the provider’s own official website (GitHub, Google AI Studio, Groq, OpenAI). <strong>Step 2:</strong> You paste it here. <strong>Step 3:</strong> Your browser calls that provider directly. Skill DNA has no server, so your key never passes through us, is never logged, and is never shared with anyone else. This is exactly how professional tools like ChatGPT’s API playground, Postman and Vercel’s BYOK integrations work — the user brings the key, the tool just uses it.</p>
-    <p class="muted small">Tip for website owners: if you deploy Skill DNA for others, each visitor uses <em>their own</em> key. You do not need to buy or share one master key, and you are not responsible for their usage or billing.</p>
-  </section>
 </main>
 
-<div id="keysModal" class="modal" hidden>
+<div id="keysModal" class="modal" hidden role="dialog" aria-modal="true" aria-label="Settings">
   <div class="modal-card">
     <div class="modal-head">
-      <h2>⚙️ API Keys — Bring Your Own Key</h2>
+      <h2>Settings</h2>
       <button class="btn btn-ghost btn-small" id="closeKeysBtn" type="button">✕ Close</button>
     </div>
-    <p class="muted">Add your own official third-party API keys once, then anyone using this site on this device can run it with their own keys. Keys are masked, testable, and forgettable in one click.</p>
+    <h3>Appearance</h3>
+    <div class="theme-group" id="themeGroup">
+      <button type="button" data-theme-btn="general" class="active">General</button>
+      <button type="button" data-theme-btn="dark">Dark</button>
+      <button type="button" data-theme-btn="cherry">Cherry</button>
+    </div>
+    <h3>Layout</h3>
+    <div class="view-group" id="viewGroup">
+      <button type="button" data-view-btn="auto" class="active">Auto</button>
+      <button type="button" data-view-btn="mobile">Mobile</button>
+      <button type="button" data-view-btn="desktop">Desktop</button>
+    </div>
+    <h3>API Keys — Bring Your Own Key</h3>
     <label><input type="checkbox" id="rememberKeys"> Remember keys on this device (otherwise they last only until you close the tab)</label>
     <div id="providerCards"></div>
     <div class="row">
       <button class="btn btn-ghost" id="forgetKeysBtn" type="button">Forget all keys</button>
       <button class="btn" id="saveKeysBtn" type="button">Save keys</button>
     </div>
-    <p class="muted small">Security, stated clearly: keys are stored only in this browser (if you ticked Remember), are sent only to the provider you chose, are never included in share links, printouts or recruiter summaries, and are never sent to Skill DNA — there is no Skill DNA server to send them to.</p>
+    <p class="muted small">Keys stay in this browser only and are never shared. Full explanation is in the repo README.</p>
     <div id="keysStatus" class="status"></div>
   </div>
 </div>
-
-<footer class="wrap foot">
-  <p>Skill DNA v2.0 — Themes (General / Dark / Cherry #890149 on #F3F3E7), mobile + desktop layouts, BYOK edition. Independent open-source tool, not affiliated with GitHub, Google, Groq or OpenAI. All analysis runs in your browser. · <a href="README.md">README</a> · <a href="docs/BYOK.md">BYOK guide</a> · <a href="CHANGELOG.md">Changelog</a> · MIT License</p>
-</footer>
 
 <script>/* Skill DNA — Bring Your Own Key (BYOK) manager.
    OFFICIAL, THIRD-PARTY API KEYS, THE WAY PROFESSIONAL WEBSITES DO IT:
@@ -732,6 +707,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
   $('openKeysBtn').addEventListener('click', openKeys);
   $('closeKeysBtn').addEventListener('click', closeKeys);
   $('keysModal').addEventListener('click', e => { if (e.target.id === 'keysModal') closeKeys(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('keysModal').hidden) closeKeys(); });
   $('saveKeysBtn').addEventListener('click', () => {
     const K = window.SkillDNA_Keys;
     K.setRemember($('rememberKeys').checked);
@@ -802,7 +778,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
       $('aiReviewText').textContent = 'Rule-based review: ' + current.report.summary + ' Top gap to fix first: ' + current.report.gaps[0];
       return;
     }
-    if (!key) { showError('Add an AI key first — open ⚙️ API Keys and paste your own official key, or paste a one-off key above.'); return; }
+    if (!key) { showError('Add an AI key first — open Settings and paste your own official key, or paste a one-off key above.'); return; }
     showError(''); setStatus('Generating AI review…');
     try {
       const text = await SkillDNA_AI.aiReview(provider, key, current.report);
