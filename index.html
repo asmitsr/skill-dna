@@ -40,6 +40,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
    as the logo, flush to the far right. No icon, no button chrome. */
 .settings-text{background:none;border:0;padding:6px 2px;color:var(--text);font-size:17px;font-weight:800;letter-spacing:.01em;cursor:pointer;line-height:1.2}
 .settings-text:hover{color:var(--accent);text-decoration:underline;text-underline-offset:4px}
+/* v2.5: developer credit, top of Settings only (not on the main page).
+   No box, no border, no background — just bold italic text, so it
+   reads clean and catches the eye the moment Settings opens. */
+.dev-credit{background:none;border:0;padding:0;margin:4px 0 18px;font-weight:800;font-style:italic;font-size:17px;line-height:1.6}
+.dev-credit a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .settings-text:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}
 nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
 .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -175,6 +180,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
         <p id="aiReviewText"></p>
       </div>
       <button class="btn" id="aiBtn" type="button">Generate AI recruiter review</button>
+      <button class="btn btn-small" id="openSettingsFromAiBtn" type="button" hidden>Open Settings → Add AI key</button>
       <p class="muted small">AI review uses only the aggregated public stats above. It never sees private repos, emails or tokens.</p>
     </div>
 
@@ -204,6 +210,10 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
       <h2>Settings</h2>
       <button class="btn btn-ghost btn-small" id="closeKeysBtn" type="button">✕ Close</button>
     </div>
+    <div class="dev-credit">
+      <div>Developed By: Asmit Sarkar 🇧🇩</div>
+      <div><a href="https://github.com/asmitsr" target="_blank" rel="noopener">Github</a></div>
+    </div>
     <h3>Appearance</h3>
     <div class="theme-group" id="themeGroup">
       <button type="button" data-theme-btn="general" class="active">General</button>
@@ -218,7 +228,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
       <button class="btn" id="saveKeysBtn" type="button">Save keys</button>
     </div>
     <p class="muted small">Keys stay in this browser only and are never shared. Full explanation is in the repo README.</p>
-    <p class="muted small">Skill DNA v2.3</p>
+    <p class="muted small">Skill DNA v2.5</p>
     <div id="keysStatus" class="status"></div>
   </div>
 </div>
@@ -716,19 +726,25 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     setStatus('Markdown report downloaded.');
   });
 
+  $('openSettingsFromAiBtn').addEventListener('click', () => openKeys());
   $('aiBtn').addEventListener('click', async () => {
     if (!current) return;
-    // v2.3: AI keys come only from Settings (BYOK). No one-off field on
-    // the form. Without a saved AI key, show the rule-based review.
+    // v2.4: AI keys come only from Settings (BYOK). No one-off field on
+    // the form. Without a saved AI key, do NOT silently fall back —
+    // show that no key is set and direct the visitor to Settings.
+    // (Basic profile analysis still works without any key, by design:
+    // the GitHub key only raises the 60/hour limit, it is not required.)
     let provider = 'none', key = null;
     const K = window.SkillDNA_Keys;
     if (K) for (const p of ['gemini', 'groq', 'openai']) if (K.getKey(p)) { provider = p; key = K.getKey(p); break; }
     if (!key) {
       $('aiReview').hidden = false;
-      $('aiReviewText').textContent = 'Rule-based review: ' + current.report.summary + ' Top gap to fix first: ' + current.report.gaps[0];
-      setStatus('No AI key in Settings — showing rule-based review.');
+      $('aiReviewText').textContent = 'No AI key found. Add your own Gemini, Groq or OpenAI key in Settings → API Keys, then try again. Your key stays in your browser only.';
+      $('openSettingsFromAiBtn').hidden = false;
+      setStatus('No AI key in Settings — open Settings to add one.');
       return;
     }
+    $('openSettingsFromAiBtn').hidden = true;
     showError(''); setStatus('Generating AI review…');
     try {
       const text = await SkillDNA_AI.aiReview(provider, key, current.report);
