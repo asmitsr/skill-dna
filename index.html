@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skill DNA — Proof, Not Claims. GitHub Skill Analyzer for Recruiters</title>
-<meta name="description" content="Skill DNA reads a developer's public GitHub work and turns it into verifiable skill evidence: languages, originality, documentation, activity and a recruiter-ready summary. No login required.">
+<meta name="description" content="Skill DNA reads a developer's public GitHub work and turns it into verifiable skill evidence: languages, originality, documentation, activity and a recruiter-ready summary. ">
 <meta property="og:title" content="Skill DNA — Proof, Not Claims">
-<meta property="og:description" content="Turn public GitHub work into recruiter-ready skill evidence. Three themes, mobile and desktop layouts, BYOK API keys.">
+<meta property="og:description" content="Turn public GitHub work into recruiter-ready skill evidence. Three themes and BYOK API keys.">
 <style>/* Skill DNA v2.0 — design tokens. Three themes, one codebase.
    General = light, professional default. Dark = low-light dashboard.
    Cherry = user-supplied brand: Cherry #890149 on Alabaster #F3F3E7.
@@ -28,7 +28,8 @@
   --input-bg:#ffffff; --track:#ead9de; --shadow:0 8px 30px rgba(137,1,73,.12); color-scheme:light;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55;transition:background .25s,color .25s}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55;transition:background .25s,color .25s;overflow-x:hidden}
+canvas{max-width:100%;height:auto}
 a{color:var(--accent)}button,input,select{font:inherit}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .wrap{max-width:980px;margin:0 auto;padding:0 18px}
@@ -47,7 +48,6 @@ nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}nav a{color:var(--mu
 .theme-group button.active,.view-group button.active{background:var(--accent);color:#fff}
 .hero{padding:34px 0 18px}.eyebrow{letter-spacing:.12em;font-size:12px;color:var(--accent2);font-weight:700}
 h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:10px 0}h2{margin-top:0}h3{margin-top:0}
-.lead{font-size:18px;max-width:760px}.hero-points{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);margin-top:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0;box-shadow:var(--shadow)}
 .muted{color:var(--muted)}.small{font-size:13px}
 .form label{display:block;font-weight:600;margin:12px 0 6px}
@@ -80,15 +80,9 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
 .provider-card .badge{float:right;background:var(--card2);color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:12px}
 .provider-card .badge.off{color:var(--muted)}
 .foot{padding:24px 18px 40px;color:var(--muted);font-size:13px}
-/* ---- View modes: Auto is responsive. Mobile forces a narrow phone layout.
-   Desktop forces the wide layout (scroll sideways on a phone, like a
-   browser's Desktop site). This is in addition to normal responsive CSS. ---- */
-body.view-mobile .wrap{max-width:520px}
-body.view-mobile .grid2{grid-template-columns:1fr}
-body.view-mobile .stats{grid-template-columns:repeat(2,1fr)}
-body.view-desktop .wrap{width:1180px;max-width:none}
-body.view-desktop .grid2{grid-template-columns:1fr 1fr}
-body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
+/* ---- Responsive only (v2.3): no forced Mobile/Desktop view.
+   The media query below is the whole layout system — phones get one
+   column, larger screens get the full grid, automatically. ---- */
 @media(max-width:700px){
   .grid2{grid-template-columns:1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -113,9 +107,6 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     <p class="eyebrow">FOR DEVELOPERS • FOR RECRUITERS • FOR THE WORLD</p>
     <h1>Your CV says “expert”.<br>Your code proves it — or it doesn’t.</h1>
     <p class="lead">Skill DNA analyzes <strong>public GitHub work only</strong> and produces skill evidence, not self-claims: which languages you actually use, how original your work is, how well you document it, and what you should build next.</p>
-    <div class="hero-points">
-      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span>✓ Mobile + Desktop</span><span class="version">v2.2</span>
-    </div>
   </section>
 
   <section id="analyzer" class="card">
@@ -128,28 +119,6 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
         <button class="btn" type="submit">Analyze →</button>
         <button class="btn btn-ghost" type="button" id="demoBtn">Try demo data</button>
       </div>
-      <p id="keyStatus" class="muted small">API keys: <span id="keyStatusText">none configured — the analyzer still works, with GitHub’s 60/hour unauthenticated limit. Open Settings to add your own official keys.</span></p>
-      <details>
-        <summary>Advanced — quick one-off key (or use Settings to save them properly)</summary>
-        <p class="muted small">Unauthenticated GitHub API allows 60 requests/hour per IP. A one-off key here is used only for this analysis and is not saved.</p>
-        <div class="grid2">
-          <div>
-            <label for="token">GitHub token (optional, one-off)</label>
-            <input id="token" type="password" placeholder="ghp_… (optional)">
-          </div>
-          <div>
-            <label for="aiKey">AI key (optional, one-off)</label>
-            <input id="aiKey" type="password" placeholder="AI key for recruiter review (optional)">
-          </div>
-        </div>
-        <label for="aiProvider">AI provider</label>
-        <select id="aiProvider">
-          <option value="none">Rule-based review only (no AI key needed)</option>
-          <option value="gemini">Google Gemini (free tier)</option>
-          <option value="groq">Groq (free tier)</option>
-          <option value="openai">OpenAI (paid credit, optional)</option>
-        </select>
-      </details>
     </form>
     <div id="status" class="status" role="status" aria-live="polite"></div>
     <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
@@ -241,12 +210,6 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
       <button type="button" data-theme-btn="dark">Dark</button>
       <button type="button" data-theme-btn="cherry">Cherry</button>
     </div>
-    <h3>Layout</h3>
-    <div class="view-group" id="viewGroup">
-      <button type="button" data-view-btn="auto" class="active">Auto</button>
-      <button type="button" data-view-btn="mobile">Mobile</button>
-      <button type="button" data-view-btn="desktop">Desktop</button>
-    </div>
     <h3>API Keys — Bring Your Own Key</h3>
     <label><input type="checkbox" id="rememberKeys"> Remember keys on this device (otherwise they last only until you close the tab)</label>
     <div id="providerCards"></div>
@@ -255,6 +218,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
       <button class="btn" id="saveKeysBtn" type="button">Save keys</button>
     </div>
     <p class="muted small">Keys stay in this browser only and are never shared. Full explanation is in the repo README.</p>
+    <p class="muted small">Skill DNA v2.3</p>
     <div id="keysStatus" class="status"></div>
   </div>
 </div>
@@ -569,7 +533,11 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
 (function () {
   const $ = id => document.getElementById(id);
   let current = null; // { user, report, isDemo }
-  // ----- Preferences: theme + view, persisted when storage allows -----
+  // ----- Preference: theme, persisted when storage allows -----
+  // v2.3: layout is pure responsive CSS — no Mobile/Desktop switch.
+  // Phones get the phone layout and PCs get the desktop layout
+  // automatically, like any normal website. No forced view, no wide
+  // layout on a phone, so no sideways scroll or zooming is needed.
   const memStore = {};
   function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return memStore[k] || null; } }
   function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { memStore[k] = v; } }
@@ -578,20 +546,8 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     document.querySelectorAll('[data-theme-btn]').forEach(b => b.classList.toggle('active', b.dataset.themeBtn === t));
     storeSet('skilldna.theme', t);
   }
-  function applyView(v) {
-    document.body.classList.remove('view-mobile', 'view-desktop');
-    if (v === 'mobile') document.body.classList.add('view-mobile');
-    if (v === 'desktop') document.body.classList.add('view-desktop');
-    document.querySelectorAll('[data-view-btn]').forEach(b => b.classList.toggle('active', b.dataset.viewBtn === v));
-    storeSet('skilldna.view', v);
-  }
   document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.themeBtn)));
-  document.querySelectorAll('[data-view-btn]').forEach(b => b.addEventListener('click', () => applyView(b.dataset.viewBtn)));
-  // Default theme: saved choice, else General (light, professional).
-  // View default: Auto — the browser's own responsive layout, which is
-  // mobile on phones and desktop on PCs/laptops automatically.
   applyTheme(storeGet('skilldna.theme') || 'general');
-  applyView(storeGet('skilldna.view') || 'auto');
   function setProgress(p) { const f = $('progressFill'); if (f) f.style.width = p + '%'; }
 
   function setStatus(t) { $('status').textContent = t || ''; }
@@ -726,7 +682,7 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
     e.preventDefault();
     const username = SkillDNA_GitHub.parseInput($('username').value);
     if (!username) { showError('Please enter a GitHub username.'); return; }
-    const token = $('token').value.trim() || (window.SkillDNA_Keys ? window.SkillDNA_Keys.getKey('github') : '') || null;
+    const token = (window.SkillDNA_Keys ? window.SkillDNA_Keys.getKey('github') : '') || null;
     try { await analyzeLive(username, token); }
     catch (err) { showError(err.message); setStatus(''); }
   });
@@ -762,23 +718,17 @@ body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
 
   $('aiBtn').addEventListener('click', async () => {
     if (!current) return;
-    let provider = $('aiProvider').value;
-    let key = $('aiKey').value.trim();
-    // Fall back to a saved BYOK key, so the panel is the main flow and
-    // the one-off field is only an override.
+    // v2.3: AI keys come only from Settings (BYOK). No one-off field on
+    // the form. Without a saved AI key, show the rule-based review.
+    let provider = 'none', key = null;
     const K = window.SkillDNA_Keys;
-    if (!key && K) {
-      if (provider !== 'none' && K.getKey(provider)) key = K.getKey(provider);
-      else if (provider === 'none') {
-        for (const p of ['gemini', 'groq', 'openai']) if (K.getKey(p)) { provider = p; key = K.getKey(p); break; }
-      }
-    }
-    if (provider === 'none') {
+    if (K) for (const p of ['gemini', 'groq', 'openai']) if (K.getKey(p)) { provider = p; key = K.getKey(p); break; }
+    if (!key) {
       $('aiReview').hidden = false;
       $('aiReviewText').textContent = 'Rule-based review: ' + current.report.summary + ' Top gap to fix first: ' + current.report.gaps[0];
+      setStatus('No AI key in Settings — showing rule-based review.');
       return;
     }
-    if (!key) { showError('Add an AI key first — open Settings and paste your own official key, or paste a one-off key above.'); return; }
     showError(''); setStatus('Generating AI review…');
     try {
       const text = await SkillDNA_AI.aiReview(provider, key, current.report);
