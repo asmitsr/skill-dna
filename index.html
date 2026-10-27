@@ -1,51 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="general">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skill DNA — Proof, Not Claims. GitHub Skill Analyzer for Recruiters</title>
 <meta name="description" content="Skill DNA reads a developer's public GitHub work and turns it into verifiable skill evidence: languages, originality, documentation, activity and a recruiter-ready summary. No login required.">
-<style>:root{--bg:#0b1020;--card:#121a33;--card2:#0f1730;--text:#eef2ff;--muted:#aab4d6;--line:#26335f;--accent:#7c5cff;--accent2:#22d3a5;--warn:#fbbf24;--danger:#f87171}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55}
-a{color:#a5b4fc}.wrap{max-width:980px;margin:0 auto;padding:0 18px}
-.top{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,16,32,.92);backdrop-filter:blur(8px);z-index:10}
-.top-in{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
+<meta property="og:title" content="Skill DNA — Proof, Not Claims">
+<meta property="og:description" content="Turn public GitHub work into recruiter-ready skill evidence. Three themes, mobile and desktop layouts, BYOK API keys.">
+<style>/* Skill DNA v2.0 — design tokens. Three themes, one codebase.
+   General = light, professional default. Dark = low-light dashboard.
+   Cherry = user-supplied brand: Cherry #890149 on Alabaster #F3F3E7.
+   All colours come from tokens below — never hard-code a theme colour
+   in a component. Contrast targets: body text ≥ 4.5:1 on its background. */
+:root, [data-theme="general"]{
+  --bg:#f4f6fb; --card:#ffffff; --card2:#eef2ff; --text:#111827; --muted:#5b657d;
+  --line:#dbe2f0; --accent:#4f46e5; --accent2:#0e9f6e; --warn:#b45309; --danger:#dc2626;
+  --input-bg:#ffffff; --track:#e5e7eb; --shadow:0 8px 30px rgba(17,24,39,.08); color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#0b1020; --card:#121a33; --card2:#0f1730; --text:#eef2ff; --muted:#aab4d6;
+  --line:#26335f; --accent:#7c5cff; --accent2:#22d3a5; --warn:#fbbf24; --danger:#f87171;
+  --input-bg:#0b1230; --track:#1e2a52; --shadow:0 8px 30px rgba(0,0,0,.35); color-scheme:dark;
+}
+[data-theme="cherry"]{
+  --bg:#F3F3E7; --card:#ffffff; --card2:#fdf2f5; --text:#2b0a16; --muted:#7a4a5a;
+  --line:#e3c9d2; --accent:#890149; --accent2:#c2255c; --warn:#9a6b00; --danger:#b00020;
+  --input-bg:#ffffff; --track:#ead9de; --shadow:0 8px 30px rgba(137,1,73,.12); color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.55;transition:background .25s,color .25s}
+a{color:var(--accent)}button,input,select{font:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.top{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:10}
+.top-in{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;gap:12px;flex-wrap:wrap}
 .logo{font-weight:800;font-size:20px;text-decoration:none;color:var(--text)}.logo span{color:var(--accent2)}
-nav a{margin-left:16px;text-decoration:none;color:var(--muted)}nav a:hover{color:var(--text)}
-.hero{padding:38px 0 20px}.eyebrow{letter-spacing:.12em;font-size:12px;color:var(--accent2);font-weight:700}
+nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--text)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.theme-group,.view-group{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.theme-group button,.view-group button{background:transparent;border:0;color:var(--muted);padding:7px 11px;cursor:pointer;font-size:13px;font-weight:600}
+.theme-group button.active,.view-group button.active{background:var(--accent);color:#fff}
+.hero{padding:34px 0 18px}.eyebrow{letter-spacing:.12em;font-size:12px;color:var(--accent2);font-weight:700}
 h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:10px 0}h2{margin-top:0}h3{margin-top:0}
-.lead{font-size:18px;color:#dbe2ff;max-width:760px}.hero-points{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);margin-top:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0}
+.lead{font-size:18px;max-width:760px}.hero-points{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:18px 0;box-shadow:var(--shadow)}
 .muted{color:var(--muted)}.small{font-size:13px}
 .form label{display:block;font-weight:600;margin:12px 0 6px}
-input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b1230;color:var(--text);font-size:16px}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--input-bg);color:var(--text);font-size:16px}
 .row{display:flex;gap:10px;flex-wrap:wrap}.row input{flex:1;min-width:240px}.row button{flex-shrink:0}
-.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
-.btn:hover{filter:brightness(1.1)}.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
-.btn-small{padding:8px 12px;font-size:14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:700px){.grid2{grid-template-columns:1fr}nav a{display:none}nav a:last-child{display:inline}}
-.status{margin-top:14px;color:var(--accent2);font-weight:600}.error{background:#3a1218;border:1px solid var(--danger);padding:12px;border-radius:10px;margin-top:14px}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px;min-height:44px}
+.btn:hover{filter:brightness(1.08)}.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-small{padding:8px 12px;font-size:14px;min-height:38px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.status{margin-top:14px;color:var(--accent2);font-weight:600}.error{background:var(--card);border:1px solid var(--danger);color:var(--danger);padding:12px;border-radius:10px;margin-top:14px}
+.progress{height:10px;background:var(--track);border-radius:20px;overflow:hidden;margin-top:12px}.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .3s}
 .results{margin-top:10px}.profile-head{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
 .profile-head img{border-radius:50%;border:3px solid var(--line)}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
-@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
 .stat b{font-size:24px;display:block}.stat span{color:var(--muted);font-size:13px}
-.score-row{margin:12px 0}.score-row .bar{height:12px;background:#1e2a52;border-radius:20px;overflow:hidden}
+.score-row{margin:12px 0}.score-row .bar{height:12px;background:var(--track);border-radius:20px;overflow:hidden}
 .score-row .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.lang-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #1e2a52}
-.dna-code{margin-top:14px;background:#0b1230;padding:10px;border-radius:8px;word-break:break-all}
-.ai-review{background:#0b1230;border-left:4px solid var(--accent2);padding:14px;border-radius:8px;margin:14px 0}
+.lang-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:20px;padding:4px 12px;margin:3px;font-size:13px;background:var(--card2)}
+.timeline{display:flex;gap:8px;flex-wrap:wrap}.timeline span{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--card2);font-size:13px}
+.grade{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:4px 14px;font-weight:800;margin-left:8px}
+.dna-code{margin-top:14px;background:var(--card2);padding:10px;border-radius:8px;word-break:break-all}
+.ai-review{background:var(--card2);border-left:4px solid var(--accent2);padding:14px;border-radius:8px;margin:14px 0}
 .table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.version{background:#1e2a52;border:1px solid var(--line);padding:2px 10px;border-radius:20px;font-size:12px;color:var(--accent2)}
+.version{background:var(--card2);border:1px solid var(--line);padding:2px 10px;border-radius:20px;font-size:12px;color:var(--accent2)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;overflow:auto;padding:20px}
-.modal-card{max-width:760px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.modal-card{max-width:760px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;color:var(--text)}
 .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .provider-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
-.provider-card .badge{float:right;background:#12351f;color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:12px}
-.provider-card .badge.off{background:#2a1a1a;color:var(--muted)}
+.provider-card .badge{float:right;background:var(--card2);color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:12px}
+.provider-card .badge.off{color:var(--muted)}
 .foot{padding:24px 18px 40px;color:var(--muted);font-size:13px}
-@media print{body{background:#fff;color:#000}.top,.hero,.form,#demo,#how,.foot{display:none}.card{border:1px solid #ccc;background:#fff}a{color:#000}}
+/* ---- View modes: Auto is responsive. Mobile forces a narrow phone layout.
+   Desktop forces the wide layout (scroll sideways on a phone, like a
+   browser's Desktop site). This is in addition to normal responsive CSS. ---- */
+body.view-mobile .wrap{max-width:520px}
+body.view-mobile .grid2{grid-template-columns:1fr}
+body.view-mobile .stats{grid-template-columns:repeat(2,1fr)}
+body.view-desktop .wrap{width:1180px;max-width:none}
+body.view-desktop .grid2{grid-template-columns:1fr 1fr}
+body.view-desktop .stats{grid-template-columns:repeat(5,1fr)}
+@media(max-width:700px){
+  .grid2{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  nav a{display:none}
+  .btn{width:100%}
+  .row .btn{width:auto}
+  .theme-group,.view-group{width:100%}
+}
+@media print{body{background:#fff;color:#000}.top,.hero,.form,#demo,#how,.foot,.controls{display:none}.card{border:1px solid #ccc;background:#fff;box-shadow:none}a{color:#000}}
 </style>
 </head>
 <body>
@@ -56,6 +103,18 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
       <a href="#analyzer">Analyzer</a>
       <a href="#how">How it works</a>
       <a href="#demo">Demo</a>
+      <div class="controls" role="group" aria-label="Theme">
+        <div class="theme-group" id="themeGroup">
+          <button type="button" data-theme-btn="general" class="active">General</button>
+          <button type="button" data-theme-btn="dark">Dark</button>
+          <button type="button" data-theme-btn="cherry">Cherry</button>
+        </div>
+        <div class="view-group" id="viewGroup" role="group" aria-label="Layout">
+          <button type="button" data-view-btn="auto" class="active">Auto</button>
+          <button type="button" data-view-btn="mobile">Mobile</button>
+          <button type="button" data-view-btn="desktop">Desktop</button>
+        </div>
+      </div>
       <button class="btn btn-small" id="openKeysBtn" type="button">⚙️ API Keys (BYOK)</button>
     </nav>
   </div>
@@ -67,7 +126,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     <h1>Your CV says “expert”.<br>Your code proves it — or it doesn’t.</h1>
     <p class="lead">Skill DNA analyzes <strong>public GitHub work only</strong> and produces skill evidence, not self-claims: which languages you actually use, how original your work is, how well you document it, and what you should build next.</p>
     <div class="hero-points">
-      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span class="version">v1.1.0</span>
+      <span>✓ No login</span><span>✓ No server</span><span>✓ Public data only</span><span>✓ Recruiter-ready report</span><span>✓ Bring Your Own Key (BYOK)</span><span>✓ Mobile + Desktop</span><span class="version">v2.0</span>
     </div>
   </section>
 
@@ -105,6 +164,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
       </details>
     </form>
     <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div class="progress" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
     <div id="error" class="error" hidden></div>
   </section>
 
@@ -123,10 +183,14 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
 
     <div class="grid2">
       <div class="card">
-        <h3>Skill DNA scores</h3>
+        <h3>Skill DNA scores <span class="grade" id="gradeBadge">—</span></h3>
         <p class="muted small">Scores are computed from public evidence, not from a CV. See “How scores work” below for the exact formula.</p>
         <div id="scores"></div>
         <p class="dna-code">DNA CODE: <code id="dnaCode">—</code></p>
+        <h4>Topics</h4>
+        <div id="topics"></div>
+        <h4>Activity timeline — repos created per year</h4>
+        <div class="timeline" id="timeline"></div>
       </div>
       <div class="card">
         <h3>Languages — by actual code, not by claim</h3>
@@ -169,6 +233,9 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
       <h3>Recruiter summary — copy &amp; paste</h3>
       <p id="recruiterSummary"></p>
       <button class="btn btn-small" id="copySummaryBtn" type="button">Copy summary</button>
+      <button class="btn btn-small btn-ghost" id="downloadJsonBtn" type="button">Download report (JSON)</button>
+      <button class="btn btn-small btn-ghost" id="downloadMdBtn" type="button">Download report (Markdown)</button>
+      <p class="muted small">JSON is for other tools and portfolios; Markdown pastes cleanly into GitHub, Notion and LinkedIn posts.</p>
     </div>
   </section>
 
@@ -214,7 +281,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
 </div>
 
 <footer class="wrap foot">
-  <p>Skill DNA v1.1.0 — BYOK edition. Independent open-source tool, not affiliated with GitHub, Google, Groq or OpenAI. All analysis runs in your browser. · <a href="README.md">README</a> · <a href="docs/BYOK.md">BYOK guide</a> · MIT License</p>
+  <p>Skill DNA v2.0 — Themes (General / Dark / Cherry #890149 on #F3F3E7), mobile + desktop layouts, BYOK edition. Independent open-source tool, not affiliated with GitHub, Google, Groq or OpenAI. All analysis runs in your browser. · <a href="README.md">README</a> · <a href="docs/BYOK.md">BYOK guide</a> · <a href="CHANGELOG.md">Changelog</a> · MIT License</p>
 </footer>
 
 <script>/* Skill DNA — Bring Your Own Key (BYOK) manager.
@@ -396,9 +463,15 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     const withTopics = repos.filter(r => (r.topics || []).length > 0);
 
     const langTotal = Object.values(languages).reduce((s, n) => s + n, 0);
-    const langList = Object.entries(languages)
+    // BUG FIX (v2.0): drop languages below 1% — they used to render as
+    // "Shell — 0%" / "JavaScript — 0%" and pollute strengths + DNA code.
+    // Small remainders are grouped as "Other" only if they reach 1%.
+    const rawLangs = Object.entries(languages)
       .map(([name, bytes]) => ({ name, bytes, percent: pct(bytes, langTotal) }))
       .sort((a, b) => b.bytes - a.bytes);
+    const kept = rawLangs.filter(l => l.percent >= 1);
+    const otherPct = 100 - kept.reduce((s, l) => s + l.percent, 0);
+    const langList = otherPct >= 1 && kept.length ? [...kept, { name: 'Other', bytes: 0, percent: otherPct }] : (kept.length ? kept : rawLangs.slice(0, 1));
 
     const topics = {};
     repos.forEach(r => (r.topics || []).forEach(t => { topics[t] = (topics[t] || 0) + 1; }));
@@ -412,7 +485,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     const overall = clamp(activity * 0.25 + originality * 0.25 + documentation * 0.25 + popularity * 0.25);
 
     const strengths = [];
-    langList.slice(0, 3).forEach(l => {
+    langList.filter(l => l.name !== 'Other').slice(0, 3).forEach(l => {
       const evidence = repos.filter(r => r.language === l.name).sort((a, b) => b.stargazers_count - a.stargazers_count)[0];
       strengths.push(l.name + ' — ' + l.percent + '% of analyzed code' + (evidence ? ' (evidence: ' + evidence.name + ')' : ''));
     });
@@ -435,7 +508,12 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     next.push('Testing & CI project: add automated tests and GitHub Actions to one existing repo and document the result.');
     if (topTopics.length === 0) next.push('Add topics to every repo (e.g. react, api, machine-learning) so both GitHub search and recruiters can find your work.');
 
-    const dnaCode = langList.slice(0, 4).map(l => l.name.toUpperCase().slice(0, 2) + '-' + l.percent).join('|') || 'NO-DATA';
+    const dnaCode = langList.filter(l => l.name !== 'Other' && l.percent >= 1).slice(0, 4).map(l => l.name.toUpperCase().slice(0, 2) + '-' + l.percent).join('|') || 'NO-DATA';
+    const grade = overall >= 85 ? 'A — Excellent' : overall >= 70 ? 'B — Strong' : overall >= 50 ? 'C — Growing' : 'D — Early stage';
+    // Timeline: repos created per year (shows growth, not just a snapshot).
+    const timeline = {};
+    repos.forEach(r => { const y = new Date(r.created_at || r.pushed_at).getFullYear(); if (y) timeline[y] = (timeline[y] || 0) + 1; });
+    const timelineList = Object.entries(timeline).map(([year, count]) => ({ year: Number(year), count })).sort((a, b) => a.year - b.year);
     const topLang = langList[0] ? langList[0].name : 'no dominant language';
     const summary = (user.name || user.login) + ' is a developer with ' + totalRepos + ' public repositories and ' + stars + ' total stars. ' +
       'Verified strengths are concentrated in ' + topLang + ' (Skill DNA overall: ' + overall + '/100; originality ' + originality + '/100, activity ' + activity + '/100). ' +
@@ -444,7 +522,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     return {
       totalRepos, stars, forks, followers: user.followers || 0, following: user.following || 0,
       originalCount: original.length, recentCount: recent.length,
-      langList, topTopics, activity, originality, documentation, popularity, overall,
+      langList, topTopics, activity, originality, documentation, popularity, overall, grade, timelineList,
       strengths: strengths.length ? strengths : ['Not enough public data to prove a strength yet — start with one original, documented project.'],
       gaps: gaps.length ? gaps : ['No major gaps detected in public data. Next step: a larger, deployed project with tests.'],
       next: [...new Set(next)].slice(0, 4), dnaCode, summary
@@ -516,6 +594,30 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
 (function () {
   const $ = id => document.getElementById(id);
   let current = null; // { user, report, isDemo }
+  // ----- Preferences: theme + view, persisted when storage allows -----
+  const memStore = {};
+  function storeGet(k) { try { return localStorage.getItem(k); } catch (e) { return memStore[k] || null; } }
+  function storeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { memStore[k] = v; } }
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.querySelectorAll('[data-theme-btn]').forEach(b => b.classList.toggle('active', b.dataset.themeBtn === t));
+    storeSet('skilldna.theme', t);
+  }
+  function applyView(v) {
+    document.body.classList.remove('view-mobile', 'view-desktop');
+    if (v === 'mobile') document.body.classList.add('view-mobile');
+    if (v === 'desktop') document.body.classList.add('view-desktop');
+    document.querySelectorAll('[data-view-btn]').forEach(b => b.classList.toggle('active', b.dataset.viewBtn === v));
+    storeSet('skilldna.view', v);
+  }
+  document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.themeBtn)));
+  document.querySelectorAll('[data-view-btn]').forEach(b => b.addEventListener('click', () => applyView(b.dataset.viewBtn)));
+  // Default theme: saved choice, else General (light, professional).
+  // View default: Auto — the browser's own responsive layout, which is
+  // mobile on phones and desktop on PCs/laptops automatically.
+  applyTheme(storeGet('skilldna.theme') || 'general');
+  applyView(storeGet('skilldna.view') || 'auto');
+  function setProgress(p) { const f = $('progressFill'); if (f) f.style.width = p + '%'; }
 
   function setStatus(t) { $('status').textContent = t || ''; }
   function showError(msg) { const e = $('error'); e.hidden = !msg; e.textContent = msg || ''; }
@@ -555,6 +657,9 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     $('scores').innerHTML = scoreRow('Overall Skill DNA', report.overall) + scoreRow('Activity', report.activity) +
       scoreRow('Originality (anti-copy)', report.originality) + scoreRow('Documentation', report.documentation) + scoreRow('Popularity', report.popularity);
     $('dnaCode').textContent = report.dnaCode;
+    $('gradeBadge').textContent = report.grade || '—';
+    $('topics').innerHTML = report.topTopics.length ? report.topTopics.map(([t, n]) => '<span class="chip">' + esc(t) + ' ×' + n + '</span>').join('') : '<p class="muted small">No topics found — adding topics helps recruiters find this work.</p>';
+    $('timeline').innerHTML = report.timelineList.length ? report.timelineList.map(t => '<span>' + t.year + ': ' + t.count + ' repo' + (t.count > 1 ? 's' : '') + '</span>').join('') : '<span class="muted small">No timeline data.</span>';
     $('languages').innerHTML = report.langList.length ? report.langList.map(l =>
       '<div class="lang-row"><span>' + esc(l.name) + '</span><b>' + l.percent + '%</b></div>').join('')
       : '<p class="muted">No language data found for the top repos.</p>';
@@ -576,10 +681,10 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
   }
 
   async function analyzeLive(username, token) {
-    showError(''); setStatus('Connecting to GitHub…');
+    showError(''); setStatus('Connecting to GitHub…'); setProgress(20);
     const data = await SkillDNA_GitHub.fetchProfile(username, token, setStatus);
     const report = SkillDNA_Analyzer.analyze(data.user, data.repos, data.languages);
-    render(data.user, report, false); renderRepos(data.repos); setStatus('Analysis complete. Share link: ?user=' + data.user.login);
+    render(data.user, report, false); renderRepos(data.repos); setProgress(100); setStatus('Analysis complete. Share link: ?user=' + data.user.login);
     history.replaceState(null, '', '?user=' + encodeURIComponent(data.user.login));
   }
 
@@ -587,7 +692,7 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     showError(''); setStatus('Loading demo data…');
     const d = SkillDNA_Analyzer.demoData();
     const report = SkillDNA_Analyzer.analyze(d.user, d.repos, d.languages);
-    render(d.user, report, true); renderRepos(d.repos); setStatus('Demo report loaded. This is fictional data — try a real username for a real report.');
+    render(d.user, report, true); renderRepos(d.repos); setProgress(100); setStatus('Demo report loaded. This is fictional data — try a real username for a real report.');
   }
 
   // ----- BYOK: keys panel, status, resolution -----
@@ -661,6 +766,23 @@ input,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--l
     try { await navigator.clipboard.writeText($('recruiterSummary').textContent); setStatus('Recruiter summary copied.'); } catch {}
   });
   $('printBtn').addEventListener('click', () => window.print());
+  function downloadFile(name, content, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], { type }));
+    a.download = name; a.click(); URL.revokeObjectURL(a.href);
+  }
+  $('downloadJsonBtn').addEventListener('click', () => {
+    if (!current) return;
+    downloadFile('skill-dna-' + current.user.login + '.json', JSON.stringify({ generatedAt: new Date().toISOString(), user: current.user.login, report: current.report }, null, 2), 'application/json');
+    setStatus('JSON report downloaded.');
+  });
+  $('downloadMdBtn').addEventListener('click', () => {
+    if (!current) return;
+    const r = current.report;
+    const md = '# Skill DNA — ' + current.user.login + '\n\nOverall: ' + r.overall + '/100 (' + r.grade + ')\n\n- Repos: ' + r.totalRepos + ' | Stars: ' + r.stars + ' | Original: ' + r.originalCount + '\n- Languages: ' + r.langList.map(l => l.name + ' ' + l.percent + '%').join(', ') + '\n\n## Strengths\n' + r.strengths.map(s => '- ' + s).join('\n') + '\n\n## Gaps\n' + r.gaps.map(s => '- ' + s).join('\n') + '\n\n' + r.summary + '\n';
+    downloadFile('skill-dna-' + current.user.login + '.md', md, 'text/markdown');
+    setStatus('Markdown report downloaded.');
+  });
 
   $('aiBtn').addEventListener('click', async () => {
     if (!current) return;
